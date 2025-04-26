@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CssBaseline, Container, List, ListItem, ListItemText, CircularProgress, Tabs, Tab } from '@material-ui/core';
+import { CssBaseline, Container, List, ListItem, ListItemText, CircularProgress, Tabs, Tab, Box, Button } from '@material-ui/core';
 import { useQuery, gql } from '@apollo/client';
 import CreateRepoForm from './CreateRepoForm';
 
@@ -58,20 +58,33 @@ const App = () => {
   };
 
   const handleTabChange = (event, newTabIndex) => {
-    setTabIndex(newTabIndex); // Change active tab
+    setTabIndex(newTabIndex); 
   };
+
+  const goBack = () => {
+    setSelectedRepo(null);
+    setTabIndex(0)
+  }
 
   return (
     <Container>
-      <CssBaseline />
+      {/* <CssBaseline /> */}
       <h1>GitHub Repositories</h1>
 
+      {selectedRepo ? 
+      <Box display={'flex'} flexDirection={'row'} alignItems={'center'} sx={{gap: '8px'}}>
+        <Button onClick={goBack} variant="contained" color="primary" sx={{marginBottom: '10px'}} >
+        &#8592;
+        </Button>
+        <h3>Pull Requests for {selectedRepo.name}</h3>
+      </Box>
+      : 
       <Tabs value={tabIndex} onChange={handleTabChange} aria-label="Tabs to switch views">
         <Tab label="Repositories" />
         <Tab label="Create New Repo" />
-      </Tabs>
+      </Tabs>}
 
-      {tabIndex === 0 && <List>
+      {tabIndex === 0 && !selectedRepo && <List>
         {data.viewer.repositories.nodes.map((repo) => (
           <ListItem button key={repo.name} onClick={() => handleRepoClick(repo)}>
             <ListItemText
@@ -84,7 +97,6 @@ const App = () => {
 
       {tabIndex === 0 && selectedRepo && (
         <>
-          <h2>Pull Requests for {selectedRepo.name}</h2>
           {prLoading ? (
             <CircularProgress />
           ) : (
