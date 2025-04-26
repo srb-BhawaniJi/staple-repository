@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CssBaseline, Container, List, ListItem, ListItemText, CircularProgress, Tabs, Tab, Box, Button } from '@material-ui/core';
+import { Container, List, ListItem, ListItemText, CircularProgress, Tabs, Tab, Box, Button, Snackbar } from '@mui/material';
 import { useQuery, gql } from '@apollo/client';
 import CreateRepoForm from './CreateRepoForm';
 
@@ -7,7 +7,7 @@ import CreateRepoForm from './CreateRepoForm';
 const GET_REPOSITORIES = gql`
   query {
     viewer {
-      repositories(first: 10) {
+      repositories(first: 20) {
         nodes {
           name
           description
@@ -38,8 +38,10 @@ const GET_PULL_REQUESTS = gql`
 const App = () => {
   const { loading, error, data , refetch} = useQuery(GET_REPOSITORIES);
   const [selectedRepo, setSelectedRepo] = useState(null);
-  const [repoDetails, setRepoDetails] = useState(null);
   const [tabIndex, setTabIndex] = useState(0);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState('success');
 
   // Fetch pull requests for the selected repository
   const { loading: prLoading, data: prData } = useQuery(GET_PULL_REQUESTS, {
@@ -66,14 +68,21 @@ const App = () => {
     setTabIndex(0)
   }
 
+  const handleCloseSnackbar = () => {
+    setOpenSnackbar(false);
+    if(snackbarSeverity === 'success'){
+      refetch();
+      setTabIndex(0);
+    }
+  };
+
   return (
     <Container>
-      {/* <CssBaseline /> */}
       <h1>GitHub Repositories</h1>
 
       {selectedRepo ? 
       <Box display={'flex'} flexDirection={'row'} alignItems={'center'} sx={{gap: '8px'}}>
-        <Button onClick={goBack} variant="contained" color="primary" sx={{marginBottom: '10px'}} >
+        <Button onClick={goBack} variant="contained" color="primary" >
         &#8592;
         </Button>
         <h3>Pull Requests for {selectedRepo.name}</h3>
@@ -86,7 +95,7 @@ const App = () => {
 
       {tabIndex === 0 && !selectedRepo && <List>
         {data.viewer.repositories.nodes.map((repo) => (
-          <ListItem button key={repo.name} onClick={() => handleRepoClick(repo)}>
+          <ListItem key={repo.name} onClick={() => handleRepoClick(repo)}>
             <ListItemText
               primary={repo.name}
               secondary={repo.description || 'No description available'}
@@ -122,10 +131,31 @@ const App = () => {
           )}
         </>
       )}
-      { tabIndex === 1 && <CreateRepoForm 
-        refetch={refetch}  
-        setTabIndex={setTabIndex}
-      />}
+      { tabIndex === 1 && 
+        <CreateRepoForm 
+          refetch={refetch}  
+          setTabIndex={setTabIndex}
+          setSnackbarMessage={setSnackbarMessage}
+          setSnackbarSeverity={setSnackbarSeverity}
+          setOpenSnackbar={setOpenSnackbar}
+        />
+      }
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={1500}
+        onClose={handleCloseSnackbar}
+        message={snackbarMessage}
+        severity={snackbarSeverity}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'center',
+        }}
+        sx={{
+          '& .MuiSnackbarContent-root': {
+            backgroundColor: snackbarSeverity === 'success' ? 'green' : 'red',
+          },
+        }}
+      />
     </Container>
   );
 };

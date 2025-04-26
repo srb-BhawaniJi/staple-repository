@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useMutation, gql } from '@apollo/client';
-import { TextField, Button, Box, Select, MenuItem, InputLabel, FormControl } from '@material-ui/core';
+import { TextField, Button, Box, Select, MenuItem, InputLabel, FormControl } from '@mui/material';
 
 // GraphQL mutation for creating a repository with visibility
 const CREATE_REPOSITORY = gql`
@@ -14,7 +14,7 @@ const CREATE_REPOSITORY = gql`
   }
 `;
 
-const CreateRepoForm = ({ refetch, setTabIndex }) => {
+const CreateRepoForm = ({ setSnackbarMessage, setSnackbarSeverity, setOpenSnackbar }) => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [visibility, setVisibility] = useState('PUBLIC'); // Default visibility is PUBLIC
@@ -27,13 +27,16 @@ const CreateRepoForm = ({ refetch, setTabIndex }) => {
         setName('');
         setDescription('');
         setVisibility('PUBLIC');
-        alert('Repository created successfully!');
-        refetch();
-        setTabIndex(0)
+        setSnackbarMessage('Repository created successfully!');
+        setSnackbarSeverity('success');
+        setOpenSnackbar(true);
+
       })
       .catch((err) => {
         console.error('Error creating repository:', err);
-        alert('Failed to create repository');
+        setSnackbarMessage(err.toString());
+        setSnackbarSeverity('error');
+        setOpenSnackbar(true);
       });
   };
 
@@ -55,6 +58,7 @@ const CreateRepoForm = ({ refetch, setTabIndex }) => {
       <FormControl margin="normal" required>
         <InputLabel>Visibility</InputLabel>
         <Select
+          label={'Visibility'}
           value={visibility}
           onChange={(e) => setVisibility(e.target.value)}
         >
@@ -65,7 +69,6 @@ const CreateRepoForm = ({ refetch, setTabIndex }) => {
       <Button variant="contained" color="primary" type="submit" disabled={loading}>
         {loading ? 'Creating...' : 'Create Repository'}
       </Button>
-      {error && <p style={{ color: 'red' }}>Error: {error.message}</p>}
     </Box>
   );
 };
