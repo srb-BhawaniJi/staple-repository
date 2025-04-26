@@ -14,7 +14,7 @@ const CREATE_REPOSITORY = gql`
   }
 `;
 
-const CreateRepoForm = ({ refetch }) => {
+const CreateRepoForm = ({ refetch, setTabIndex }) => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [visibility, setVisibility] = useState('PUBLIC'); // Default visibility is PUBLIC
@@ -26,9 +26,10 @@ const CreateRepoForm = ({ refetch }) => {
       .then(() => {
         setName('');
         setDescription('');
-        setVisibility('PUBLIC'); // Reset visibility after creating repo
+        setVisibility('PUBLIC');
         alert('Repository created successfully!');
-        refetch();  // Refetch repositories after creation
+        refetch();
+        setTabIndex(0)
       })
       .catch((err) => {
         console.error('Error creating repository:', err);
