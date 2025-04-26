@@ -95,7 +95,7 @@ const App = () => {
 
       {tabIndex === 0 && !selectedRepo && <List>
         {data.viewer.repositories.nodes.map((repo) => (
-          <ListItem key={repo.name} onClick={() => handleRepoClick(repo)}>
+          <ListItem key={repo.name} onClick={() => handleRepoClick(repo)} sx={{ cursor: 'pointer'}}>
             <ListItemText
               primary={repo.name}
               secondary={repo.description || 'No description available'}
